@@ -16,8 +16,3 @@ class Environment():
         return reward
 
 
-if __name__ == "__main__":
-    env = Environment()
-    a = env.draw(1)
-    print(a)
-
