@@ -30,13 +30,16 @@ class ActionEliminationAlgo():
 
 
     def bound(self, arm_id):
-        return CFunction(self.number_times_picked[arm_id - 1], self.delta, len(self.omega), self.epsilon)
+        bound = CFunction(self.number_times_picked[arm_id - 1], self.delta, len(self.omega), self.epsilon)
+        #print("Times picked arm " + str(arm_id) + " is: " + str(self.number_times_picked[arm_id - 1]))
+        #print("Bound: " + str(bound))
+        return bound
 
 
     def removeBadArms(self):
         curr_best_mean = max(self.est_means)
         curr_best_arm_id = self.est_means.index(curr_best_mean) + 1
-        for arm_id in self.omega:
+        for arm_id in self.epoch_list:
             if arm_id != curr_best_arm_id:
                 if curr_best_mean - self.bound(curr_best_arm_id) > self.est_means[arm_id - 1] + self.bound(arm_id):
                     self.omega.remove(arm_id)
@@ -47,12 +50,16 @@ class ActionEliminationAlgo():
         self.epoch_k += 1
         if self.epoch_k >= len(self.omega) * self.r:
             self.epoch_done = True
+            #print("Epoch done! ")
         return action
 
 
     def isDone(self):
         if len(self.omega) == 1:
             return True
+        else:
+            #print("Omega: " + str(self.omega))
+            #print("Est means: " + str(self.est_means))
             return False
 
     def result(self):

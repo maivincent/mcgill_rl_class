@@ -29,7 +29,11 @@ class MainLoop():
     def findBestArm(self):
         while not self.algo.isDone():
             self.doOneStep()
+            #print("Step: " + str(self.step))
         return self.algo.result()
+
+    def get_action_memory(self):
+        return self.action_memory
 
 
 
@@ -37,4 +41,5 @@ class MainLoop():
 if __name__ == "__main__":
     main_loop = MainLoop()
     result = main_loop.findBestArm()
+    print(result)
 
