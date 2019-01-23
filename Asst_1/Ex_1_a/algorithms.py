@@ -1,7 +1,7 @@
 from utils import CFunction, UFunction
 import math
 import numpy as np
-
+import random
 
 class ActionEliminationAlgo():
     def __init__(self, delta, epsilon):
@@ -15,6 +15,7 @@ class ActionEliminationAlgo():
         self.epoch_done = False
         self.epoch_k = 0
         self.epoch_list = list(self.omega)
+        random.shuffle(self.epoch_list)
 
 
     def update(self, arm_id, reward):
@@ -27,6 +28,7 @@ class ActionEliminationAlgo():
             self.epoch_done = False
             self.epoch_k = 0
             self.epoch_list = list(self.omega)
+            random.shuffle(self.epoch_list)
 
 
     def bound(self, arm_id):
