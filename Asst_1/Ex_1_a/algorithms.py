@@ -3,12 +3,11 @@ import math
 import numpy as np
 import random
 
-OMEGA = {1, 2, 3, 4, 5, 6}
 
 class ActionEliminationAlgo():
     def __init__(self, delta, epsilon):
         self.r = 1
-        self.omega = OMEGA
+        self.omega = {1, 2, 3, 4, 5, 6}
         self.est_means = [None for k in range(len(self.omega))]
         self.received_rewards = [[] for k in range(len(self.omega))]
         self.number_times_picked = [0 for k in range(len(self.omega))]
