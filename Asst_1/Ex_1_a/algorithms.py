@@ -40,12 +40,23 @@ class ActionEliminationAlgo():
 
 
     def removeBadArms(self):
-        curr_best_mean = max(self.est_means)
-        curr_best_arm_id = self.est_means.index(curr_best_mean) + 1
+        est_means_with_bounds = [0 for k in range(len(self.omega))]
+        bounds = [0 for k in range(len(self.omega))]
+        for i in range(len(est_means_with_bounds)):
+            bounds[i] = self.bound(i+1)
+            est_means_with_bounds[i] = self.est_means[i] + bounds[i]
+        curr_best = max(est_means_with_bounds)
+        curr_best_arm_id = est_means_with_bounds.index(curr_best) + 1
         for arm_id in self.epoch_list:
             if arm_id != curr_best_arm_id:
-                if curr_best_mean - self.bound(curr_best_arm_id) > self.est_means[arm_id - 1] + self.bound(arm_id):
+                if curr_best - 2*bounds[curr_best_arm_id -1] > est_means_with_bounds[arm_id - 1]:
                     self.omega.remove(arm_id)
+        #curr_best_mean = max(self.est_means)
+        #curr_best_arm_id = self.est_means.index(curr_best_mean) + 1
+        #for arm_id in self.epoch_list:
+        #    if arm_id != curr_best_arm_id:
+        #        if curr_best_mean - self.bound(curr_best_arm_id) > self.est_means[arm_id - 1] + self.bound(arm_id):
+        #            self.omega.remove(arm_id)
 
 
     def nextAction(self):

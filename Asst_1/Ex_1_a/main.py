@@ -6,7 +6,7 @@ import os
 
 
 FIXED_NB_STEPS = 7000
-NB_RUNS = 4000
+NB_RUNS = 5000
 EXP_NAME = "action_elimination_article"
 
 class MainLoop():
@@ -59,15 +59,16 @@ class Drawer():
         plt.savefig(output_path, bbox_inches="tight")
 
     def save_csv(self, sum_action_step, csv_title):
-        path = self.output_path_root + "/" + csv_title + ".csv"
-        if not os.path.exists(path):
-            with open(path, "w"):
-                pass
-        scores_file = open(path, "a")
-        for action in sum_action_step:
-            with scores_file:
-                writer = csv.writer(scores_file)
-                writer.writerow(action)
+        #path = self.output_path_root + "/" + csv_title + ".csv"
+        #if not os.path.exists(path):
+        #    with open(path, "w"):
+        #        pass
+        #scores_file = open(path, "a")
+        #for action in sum_action_step:
+        #    with scores_file:
+        #        writer = csv.writer(scores_file)
+        #        writer.writerow(action)
+        pass
 
     def make_dir(self, path):
         # Check if directory exists, if not, create it
@@ -105,7 +106,7 @@ if __name__ == "__main__":
         # Show at which step we are
         if i % 10 == 0:
             print(i)
-    print sum_action_step
+    #print(str(sum_action_step)) 
 
     # Drawing the results
     drawer = Drawer(EXP_NAME)
