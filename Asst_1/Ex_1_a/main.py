@@ -1,8 +1,11 @@
 from environment import Environment
 from algorithms import ActionEliminationAlgo
+import matplotlib.pyplot as plt
+import os
 
 
 FIXED_NB_STEPS = 6000
+EXP_NAME = "action_elimination_article"
 
 class MainLoop():
     def __init__(self):
@@ -38,21 +41,59 @@ class MainLoop():
         return self.action_memory
 
 
+class Drawer():
+    def __init__(self, exp_name):
+        self.output_path_root = "./experiments/" + exp_name
+        self.make_dir("./experiments")
+        self.make_dir(self.output_path_root)
+
+    def save_png(self, x, sum_action_step, x_label, y_label, plot_title):
+        plt.subplots()
+        for i in range(6):
+            y = sum_action_step[i]
+            plt.plot(x, y)
+        plt.title(plot_title)
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        output_path = self.output_path_root + "/" + plot_title + ".png"
+        plt.savefig(output_path, bbox_inches="tight")
+
+    def make_dir(self, path):
+        if not os.path.exists(path):
+            try:  
+                os.mkdir(path)
+            except OSError:  
+                print ("Creation of the directory %s failed" % path)
+            else:  
+                print ("Successfully created the directory %s " % path)        
+
+
+
+
 
 
 if __name__ == "__main__":
-    action_sum_per_step = [[0, 0, 0, 0, 0, 0] for k in range(FIXED_NB_STEPS)]
+    sum_action_step = []
+    for i in range(6):
+        a = ([0 for k in range(FIXED_NB_STEPS)])
+        sum_action_step.append(a)
 
-    for i in range(1000):
+
+    for i in range(5000):
         main_loop = MainLoop()
         result = main_loop.findBestArm()
         action_mem = main_loop.get_action_memory()
         for time_step in range(len(action_mem)):
             action = action_mem[time_step]
             try:
-                action_sum_per_step[time_step-1][action-1] += 1
+                sum_action_step[action-1][time_step] += 1
             except:
                 print("Could not with time step: " + str(time_step) + " and action: " + str(action))
-        print(result)
-    print action_sum_per_step
+        #print(result)
+        if i % 10 == 0:
+            print(i)
+    print sum_action_step
+
+    drawer = Drawer(EXP_NAME)
+    drawer.save_png(range(FIXED_NB_STEPS), sum_action_step, "Number of pulls", "P(I_t = i)", "ActionEliminationSampling")
 
