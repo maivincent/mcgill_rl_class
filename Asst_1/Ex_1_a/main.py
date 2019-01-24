@@ -1,11 +1,12 @@
 from environment import Environment
 from algorithms import ActionEliminationAlgo
 import matplotlib.pyplot as plt
+import csv
 import os
 
 
-FIXED_NB_STEPS = 6000
-NB_RUNS = 200
+FIXED_NB_STEPS = 7000
+NB_RUNS = 4000
 EXP_NAME = "action_elimination_article"
 
 class MainLoop():
@@ -57,6 +58,17 @@ class Drawer():
         output_path = self.output_path_root + "/" + plot_title + ".png"
         plt.savefig(output_path, bbox_inches="tight")
 
+    def save_csv(self, sum_action_step, csv_title):
+        path = self.output_path_root + "/" + csv_title + ".csv"
+        if not os.path.exists(path):
+            with open(path, "w"):
+                pass
+        scores_file = open(path, "a")
+        for action in sum_action_step:
+            with scores_file:
+                writer = csv.writer(scores_file)
+                writer.writerow(action)
+
     def make_dir(self, path):
         # Check if directory exists, if not, create it
         if not os.path.exists(path):
@@ -98,4 +110,5 @@ if __name__ == "__main__":
     # Drawing the results
     drawer = Drawer(EXP_NAME)
     drawer.save_png(range(FIXED_NB_STEPS), sum_action_step, "Number of pulls", "P(I_t = i)", "ActionEliminationSampling")
+    drawer.save_csv(sum_action_step, "ActionEliminationSampling")
 
