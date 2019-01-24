@@ -84,9 +84,9 @@ class ActionEliminationAlgo():
 
 
 
-class UBCAlgo():
+class UCBAlgo():
     def __init__(self, delta, epsilon):
-        self.omega = OMEGA
+        self.omega = {1, 2, 3, 4, 5, 6}
         self.est_means = [None for k in range(len(self.omega))]
         self.means_with_bounds = [None for k in range(len(self.omega))]
         self.received_rewards = [[] for k in range(len(self.omega))]
@@ -98,6 +98,7 @@ class UBCAlgo():
         self.initial_count = 0
         self.is_done = False
         self.end_result = None
+        self.beta = 1.66
 
 
     def update(self, arm_id, reward):
@@ -112,19 +113,18 @@ class UBCAlgo():
             if not self.initialisation_done:
                 action = self.omega_list[self.initial_count]
                 self.initial_count += 1
-                if initial_count == len(self.omega):
-                    self.initialisation_done == True
+                if self.initial_count >= len(self.omega_list):
+                    self.initialisation_done = True
             else:
                 for i in range(len(self.omega)):
-                    self.means_with_bounds[i] = self.est_means[i] + self.bound(i)
-                curr_best_mean = max(self.means_with_bounds)
-                action = self.means_with_bounds.index(curr_best_mean) + 1
+                    self.means_with_bounds[i] = self.est_means[i] + self.bound(i+1)
+                curr_best_mean_with_bounds = max(self.means_with_bounds)
+                action_id = self.means_with_bounds.index(curr_best_mean_with_bounds)
+                action = self.omega_list[action_id]
             return action
 
-
-
     def bound(self, arm_id):
-        bound = CFunction(self.number_times_picked[arm_id - 1], self.delta, len(self.omega), self.epsilon)
+        bound = (1+self.beta)*CFunction(self.number_times_picked[arm_id - 1], self.delta, len(self.omega), self.epsilon)
         return bound
 
 
@@ -138,6 +138,7 @@ class UBCAlgo():
         if curr_best_mean_minus_bound > second_best_mean_plus_bound:
             self.is_done = True
             self.end_result = best_mean_act
+            print("Algo is done!")
             return True
         else:
             return False

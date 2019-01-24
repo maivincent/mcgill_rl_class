@@ -1,19 +1,19 @@
 from environment import Environment
-from algorithms import ActionEliminationAlgo
+from algorithms import ActionEliminationAlgo, UCBAlgo
 import matplotlib.pyplot as plt
 import csv
 import os
 
 
 FIXED_NB_STEPS = 7000
-NB_RUNS = 5000
-EXP_NAME = "action_elimination_article"
+NB_RUNS = 100
+EXP_NAME = "UBC_1_article"
 
 class MainLoop():
     def __init__(self):
         self.delta = 0.1
         self.epsilon = 0.01
-        self.algo = ActionEliminationAlgo(self.delta, self.epsilon) # Change here for another algorithm
+        self.algo = UCBAlgo(self.delta, self.epsilon) # Change here for another algorithm
         self.env = Environment()
         self.action_memory = []
         self.reward_memory = []
@@ -110,6 +110,6 @@ if __name__ == "__main__":
 
     # Drawing the results
     drawer = Drawer(EXP_NAME)
-    drawer.save_png(range(FIXED_NB_STEPS), sum_action_step, "Number of pulls", "P(I_t = i)", "ActionEliminationSampling")
-    drawer.save_csv(sum_action_step, "ActionEliminationSampling")
+    drawer.save_png(range(FIXED_NB_STEPS), sum_action_step, "Number of pulls", "P(I_t = i)", EXP_NAME)
+    drawer.save_csv(sum_action_step, EXP_NAME)
 
