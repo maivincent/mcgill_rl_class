@@ -5,20 +5,18 @@ import os
 
 
 FIXED_NB_STEPS = 6000
-NB_RUNS = 5000
+NB_RUNS = 200
 EXP_NAME = "action_elimination_article"
 
 class MainLoop():
     def __init__(self):
         self.delta = 0.1
         self.epsilon = 0.01
-        self.algo = ActionEliminationAlgo(self.delta, self.epsilon)
+        self.algo = ActionEliminationAlgo(self.delta, self.epsilon) # Change here for another algorithm
         self.env = Environment()
         self.action_memory = []
         self.reward_memory = []
         self.step = 0
-
-
 
     def doOneStep(self):
         self.step += 1
@@ -32,10 +30,10 @@ class MainLoop():
         self.algo.update(action,reward)
 
     def findBestArm(self):
+        # HERE: Choose the stop condition: algorithm has solved problem OR fixed number of steps (better to do averages per step)
         #while not self.algo.isDone():
         while self.step < FIXED_NB_STEPS:
             self.doOneStep()
-            #print("Step: " + str(self.step))
         return self.algo.result()
 
     def get_action_memory(self):
@@ -60,6 +58,7 @@ class Drawer():
         plt.savefig(output_path, bbox_inches="tight")
 
     def make_dir(self, path):
+        # Check if directory exists, if not, create it
         if not os.path.exists(path):
             try:  
                 os.mkdir(path)
@@ -74,22 +73,24 @@ class Drawer():
 
 
 if __name__ == "__main__":
+    # Initializing the sum_action_step matrix
+        # 1st index: action (1 to 6)
+        # 2nd index: time step (1 to FIXED_NB_STEPS)
+        # Value inside: number of time this action has been chosen, divided by number of runs
     sum_action_step = []
     for i in range(6):
-        a = ([0 for k in range(FIXED_NB_STEPS)])
+        a = ([0.0 for k in range(FIXED_NB_STEPS)])
         sum_action_step.append(a)
 
-
+    # Running the MainLoop FIXED_NB_STEPS time and populating the sum_action_step matrix
     for i in range(NB_RUNS):
         main_loop = MainLoop()
         result = main_loop.findBestArm()
         action_mem = main_loop.get_action_memory()
         for time_step in range(len(action_mem)):
             action = action_mem[time_step]
-            try:
-                sum_action_step[action-1][time_step] += 1/NB_RUNS
-            except:
-                print("Could not with time step: " + str(time_step) + " and action: " + str(action))
+            sum_action_step[action-1][time_step] += 1.0/NB_RUNS
+        # Show at which step we are
         if i % 10 == 0:
             print(i)
     print sum_action_step
