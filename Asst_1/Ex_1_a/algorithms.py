@@ -1,15 +1,17 @@
-from utils import CFunction, UFunction
+from utils import CFunction, UFunction, secondLargest
 import math
 import numpy as np
 import random
 
+OMEGA = {1, 2, 3, 4, 5, 6}
+
 class ActionEliminationAlgo():
     def __init__(self, delta, epsilon):
         self.r = 1
-        self.omega = {1, 2, 3, 4, 5, 6}
-        self.est_means = [None, None, None, None, None, None]
-        self.received_rewards = [[] for k in range(6)]
-        self.number_times_picked = [0, 0, 0, 0, 0, 0]
+        self.omega = OMEGA
+        self.est_means = [None for k in range(len(self.omega))]
+        self.received_rewards = [[] for k in range(len(self.omega))]
+        self.number_times_picked = [0 for k in range(len(self.omega))]
         self.delta = delta
         self.epsilon = epsilon
         self.epoch_done = False
@@ -48,12 +50,15 @@ class ActionEliminationAlgo():
 
 
     def nextAction(self):
-        action = self.epoch_list[self.epoch_k % len(self.epoch_list)]
-        self.epoch_k += 1
-        if self.epoch_k >= len(self.omega) * self.r:
-            self.epoch_done = True
-            #print("Epoch done! ")
-        return action
+        if len(self.epoch_list) == 1:
+            return self.epoch_list[0]
+        else:
+            action = self.epoch_list[self.epoch_k % len(self.epoch_list)]
+            self.epoch_k += 1
+            if self.epoch_k >= len(self.omega) * self.r:
+                self.epoch_done = True
+                #print("Epoch done! ")
+            return action
 
 
     def isDone(self):
@@ -69,5 +74,63 @@ class ActionEliminationAlgo():
 
 
 
+class UBCAlgo():
+    def __init__(self, delta, epsilon):
+        self.omega = OMEGA
+        self.est_means = [None for k in range(len(self.omega))]
+        self.means_with_bounds = [None for k in range(len(self.omega))]
+        self.received_rewards = [[] for k in range(len(self.omega))]
+        self.number_times_picked = [0 for k in range(len(self.omega))]
+        self.delta = delta
+        self.epsilon = epsilon
+        self.omega_list = list(self.omega)
+        self.initialisation_done = False
+        self.initial_count = 0
+        self.is_done = False
+        self.end_result = None
 
 
+    def update(self, arm_id, reward):
+        self.received_rewards[arm_id - 1].append(reward)
+        self.number_times_picked[arm_id - 1] += 1
+        self.est_means[arm_id - 1] = np.mean(self.received_rewards[arm_id - 1])
+
+    def nextAction(self):
+        if self.is_done:
+            return self.end_result
+        else:
+            if not self.initialisation_done:
+                action = self.omega_list[self.initial_count]
+                self.initial_count += 1
+                if initial_count == len(self.omega):
+                    self.initialisation_done == True
+            else:
+                for i in range(len(self.omega)):
+                    self.means_with_bounds[i] = self.est_means[i] + self.bound(i)
+                curr_best_mean = max(self.means_with_bounds)
+                action = self.means_with_bounds.index(curr_best_mean) + 1
+            return action
+
+
+
+    def bound(self, arm_id):
+        bound = CFunction(self.number_times_picked[arm_id - 1], self.delta, len(self.omega), self.epsilon)
+        return bound
+
+
+    def isDone(self):
+        curr_best_mean = max(self.est_means)
+        best_mean_act = self.est_means.index(curr_best_mean) + 1
+        curr_best_mean_minus_bound = curr_best_mean - bound(best_mean_act)
+
+        second_best_mean_plus_bound = secondLargest(self.means_with_bounds)
+
+        if curr_best_mean_minus_bound > second_best_mean_plus_bound:
+            self.is_done = True
+            self.end_result = best_mean_act
+            return True
+        else:
+            return False
+
+    def result(self):
+        return self.end_result
