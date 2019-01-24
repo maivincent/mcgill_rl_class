@@ -5,6 +5,7 @@ import os
 
 
 FIXED_NB_STEPS = 6000
+NB_RUNS = 5000
 EXP_NAME = "action_elimination_article"
 
 class MainLoop():
@@ -79,21 +80,21 @@ if __name__ == "__main__":
         sum_action_step.append(a)
 
 
-    for i in range(5000):
+    for i in range(NB_RUNS):
         main_loop = MainLoop()
         result = main_loop.findBestArm()
         action_mem = main_loop.get_action_memory()
         for time_step in range(len(action_mem)):
             action = action_mem[time_step]
             try:
-                sum_action_step[action-1][time_step] += 1
+                sum_action_step[action-1][time_step] += 1/NB_RUNS
             except:
                 print("Could not with time step: " + str(time_step) + " and action: " + str(action))
-        #print(result)
         if i % 10 == 0:
             print(i)
     print sum_action_step
 
+    # Drawing the results
     drawer = Drawer(EXP_NAME)
     drawer.save_png(range(FIXED_NB_STEPS), sum_action_step, "Number of pulls", "P(I_t = i)", "ActionEliminationSampling")
 
