@@ -8,9 +8,10 @@ class ActionEliminationAlgo():
     def __init__(self, delta, epsilon):
         self.r = 1
         self.omega = {1, 2, 3, 4, 5, 6}
-        self.est_means = [None for k in range(len(self.omega))]
-        self.received_rewards = [[] for k in range(len(self.omega))]
-        self.number_times_picked = [0 for k in range(len(self.omega))]
+        self.nb_arms = len(self.omega)
+        self.est_means = [None for k in range(self.nb_arms)]
+        self.received_rewards = [[] for k in range(self.nb_arms)]
+        self.number_times_picked = [0 for k in range(self.nb_arms)]
         self.delta = delta
         self.epsilon = epsilon
         self.epoch_done = False
@@ -40,17 +41,26 @@ class ActionEliminationAlgo():
 
 
     def removeBadArms(self):
-        est_means_with_bounds = [0 for k in range(len(self.omega))]
-        bounds = [0 for k in range(len(self.omega))]
-        for i in range(len(est_means_with_bounds)):
-            bounds[i] = self.bound(i+1)
-            est_means_with_bounds[i] = self.est_means[i] + bounds[i]
-        curr_best = max(est_means_with_bounds)
-        curr_best_arm_id = est_means_with_bounds.index(curr_best) + 1
-        for arm_id in self.epoch_list:
-            if arm_id != curr_best_arm_id:
-                if curr_best - 2*bounds[curr_best_arm_id -1] > est_means_with_bounds[arm_id - 1]:
-                    self.omega.remove(arm_id)
+        if len(self.omega) > 1:
+            est_means_with_bounds = [0 for k in range(self.nb_arms)]
+            for i in range(self.nb_arms):
+                est_means_with_bounds[i] = self.est_means[i] + self.bound(i+1)
+            curr_best = max(est_means_with_bounds)
+            curr_best_arm_id = est_means_with_bounds.index(curr_best) + 1
+            curr_best_minus_bound = curr_best - 2*self.bound(curr_best_arm_id)
+
+            for arm_id in self.epoch_list:
+                try:
+                    if curr_best_minus_bound > est_means_with_bounds[arm_id - 1]: 
+                        self.omega.remove(arm_id)
+                except:
+                    print(" !! Problem of index_out_of_range ")
+                    print(" est_means_with_bounds: " + str(est_means_with_bounds))
+                    print(" arm_id: " + str(arm_id))
+                    print(" curr_best: " + str(curr_best))
+                    print(" omega: " + str(self.omega))
+        else:
+            pass
         #curr_best_mean = max(self.est_means)
         #curr_best_arm_id = self.est_means.index(curr_best_mean) + 1
         #for arm_id in self.epoch_list:
