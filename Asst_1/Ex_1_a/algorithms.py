@@ -108,7 +108,7 @@ class UCBAlgo():
         self.est_means[arm_id - 1] = np.mean(self.received_rewards[arm_id - 1])
 
     def nextAction(self):
-        if self.is_done:
+        if self.isDone():
             return self.end_result
             record = True
         else:
@@ -142,7 +142,6 @@ class UCBAlgo():
         if curr_best_mean_minus_bound > second_best_mean_plus_bound:
             self.is_done = True
             self.end_result = best_mean_act
-            print("Algo is done!")
             return True
         else:
             return False
@@ -174,9 +173,9 @@ class LUCBAlgo():
         self.est_means[arm_id - 1] = np.mean(self.received_rewards[arm_id - 1])
 
     def nextAction(self):
-        if self.is_done:
-            return self.end_result
+        if self.isDone():
             record = True
+            return self.end_result, record
         else:
             if not self.initialisation_done:
                 action = self.omega_list[self.initial_count]
@@ -198,7 +197,7 @@ class LUCBAlgo():
                     action_id = self.means_with_bounds.index(second_best_mean_plus_bound)
                     action = self.omega_list[action_id]
                     self.one_two_switch = 0
-                    record = False
+                    record = True
             return action, record
 
     def bound(self, arm_id):
@@ -207,16 +206,21 @@ class LUCBAlgo():
 
 
     def isDone(self):
+        if None in self.est_means or None in self.means_with_bounds:
+            return False
+
+        if self.is_done:
+            return True
+
         curr_best_mean = max(self.est_means)
         best_mean_act = self.est_means.index(curr_best_mean) + 1
-        curr_best_mean_minus_bound = curr_best_mean - bound(best_mean_act)
+        curr_best_mean_minus_bound = curr_best_mean - self.bound(best_mean_act)
 
         second_best_mean_plus_bound = secondLargest(self.means_with_bounds)
 
         if curr_best_mean_minus_bound > second_best_mean_plus_bound:
             self.is_done = True
             self.end_result = best_mean_act
-            print("Algo is done!")
             return True
         else:
             return False
