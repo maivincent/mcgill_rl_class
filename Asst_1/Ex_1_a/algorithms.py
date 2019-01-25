@@ -1,4 +1,4 @@
-from utils import CFunction, UFunction, secondLargest
+from utils import CFunction, UFunction, secondLargest, maxExcept
 import math
 import numpy as np
 import random
@@ -137,7 +137,7 @@ class UCBAlgo():
         best_mean_act = self.est_means.index(curr_best_mean) + 1
         curr_best_mean_minus_bound = curr_best_mean - bound(best_mean_act)
 
-        second_best_mean_plus_bound = secondLargest(self.means_with_bounds)
+        second_best_mean_plus_bound = maxExcept(self.means_with_bounds, best_mean_act - 1)
 
         if curr_best_mean_minus_bound > second_best_mean_plus_bound:
             self.is_done = True
@@ -191,10 +191,12 @@ class LUCBAlgo():
                     self.one_two_switch = 1
                     record = True
                 else:
+                    curr_best_mean = max(self.est_means)
+                    best_id = self.est_means.index(curr_best_mean)
                     for i in range(len(self.omega)): # Only update self.means_with_bounds when we receive the first one
                         self.means_with_bounds[i] = self.est_means[i] + self.bound(i+1)
-                    second_best_mean_plus_bound =  secondLargest(self.means_with_bounds)
-                    action_id = self.means_with_bounds.index(second_best_mean_plus_bound)
+                    best_mean_plus_bound =  maxExcept(self.means_with_bounds, best_id)
+                    action_id = self.means_with_bounds.index(best_mean_plus_bound)
                     action = self.omega_list[action_id]
                     self.one_two_switch = 0
                     record = True
@@ -216,7 +218,8 @@ class LUCBAlgo():
         best_mean_act = self.est_means.index(curr_best_mean) + 1
         curr_best_mean_minus_bound = curr_best_mean - self.bound(best_mean_act)
 
-        second_best_mean_plus_bound = secondLargest(self.means_with_bounds)
+
+        second_best_mean_plus_bound = maxExcept(self.means_with_bounds, best_mean_act - 1)
 
         if curr_best_mean_minus_bound > second_best_mean_plus_bound:
             self.is_done = True

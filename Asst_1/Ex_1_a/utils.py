@@ -29,6 +29,13 @@ def secondLargest(numbers):
                 m2 = x
     return m2 if count >= 2 else None
 
+def maxExcept(numbers, forbidden_id):
+    a = max(numbers)
+    a_id = numbers.index(a)
+    if a_id == forbidden_id:
+        a = secondLargest(numbers)
+    return a
+
 def smoothen(a_list):
     a = []
     for i in range(len(a_list) - 1):
