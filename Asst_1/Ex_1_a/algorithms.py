@@ -34,7 +34,7 @@ class ActionEliminationAlgo():
 
 
     def bound(self, arm_id):
-        bound = CFunction(self.number_times_picked[arm_id - 1], self.delta, len(self.omega), self.epsilon)
+        bound = CFunction(self.number_times_picked[arm_id - 1], self.delta, self.nb_arms, self.epsilon)
         #print("Times picked arm " + str(arm_id) + " is: " + str(self.number_times_picked[arm_id - 1]))
         #print("Bound: " + str(bound))
         return bound
@@ -98,10 +98,11 @@ class ActionEliminationAlgo():
 class UCBAlgo():
     def __init__(self, delta, epsilon, omega):
         self.omega = omega
-        self.est_means = [None for k in range(len(self.omega))]
-        self.means_with_bounds = [None for k in range(len(self.omega))]
-        self.received_rewards = [[] for k in range(len(self.omega))]
-        self.number_times_picked = [0 for k in range(len(self.omega))]
+        self.nb_arms = len(self.omega)
+        self.est_means = [None for k in range(self.nb_arms)]
+        self.means_with_bounds = [None for k in range(self.nb_arms)]
+        self.received_rewards = [[] for k in range(self.nb_arms)]
+        self.number_times_picked = [0 for k in range(self.nb_arms)]
         self.delta = delta
         self.epsilon = epsilon
         self.omega_list = list(self.omega)
@@ -138,7 +139,7 @@ class UCBAlgo():
             return action, record
 
     def bound(self, arm_id):
-        bound = (1+self.beta)*CFunction(self.number_times_picked[arm_id - 1], self.delta, len(self.omega), self.epsilon)
+        bound = (1+self.beta)*CFunction(self.number_times_picked[arm_id - 1], self.delta, self.nb_arms, self.epsilon)
         return bound
 
 
@@ -170,10 +171,11 @@ class UCBAlgo():
 class LUCBAlgo():
     def __init__(self, delta, epsilon, omega):
         self.omega = omega
-        self.est_means = [None for k in range(len(self.omega))]
-        self.means_with_bounds = [None for k in range(len(self.omega))]
-        self.received_rewards = [[] for k in range(len(self.omega))]
-        self.number_times_picked = [0 for k in range(len(self.omega))]
+        self.nb_arms = len(self.omega)
+        self.est_means = [None for k in range(self.nb_arms)]
+        self.means_with_bounds = [None for k in range(self.nb_arms)]
+        self.received_rewards = [[] for k in range(self.nb_arms)]
+        self.number_times_picked = [0 for k in range(self.nb_arms)]
         self.delta = delta
         self.epsilon = epsilon
         self.omega_list = list(self.omega)
@@ -220,7 +222,7 @@ class LUCBAlgo():
             return action, record
 
     def bound(self, arm_id):
-        bound = CFunction(self.number_times_picked[arm_id - 1], self.delta, len(self.omega), self.epsilon)
+        bound = CFunction(self.number_times_picked[arm_id - 1], self.delta, self.nb_arms, self.epsilon)
         return bound
 
 
