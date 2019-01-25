@@ -6,15 +6,15 @@ import csv
 import os
 
 
-FIXED_NB_STEPS = 7000
-NB_RUNS = 30
-EXP_NAME = "LUBC_1_article"
+NB_RUNS = 5000
+EXP_NAME = "ActionElimination_book"
 NB_ARMS = 10
 
 ENVIRONMENT = BookEnvironment()
+FIXED_NB_H1 = 80
 
 class MainLoop():
-    def __init__(self):
+    def __init__(self, nb_steps):
         self.delta = 0.1
         self.epsilon = 0.01
         self.env = ENVIRONMENT
@@ -23,6 +23,7 @@ class MainLoop():
         self.action_memory = []
         self.reward_memory = []
         self.step = 0
+        self.nb_steps = nb_steps
 
     def doOneStep(self):
         
@@ -39,7 +40,7 @@ class MainLoop():
     def findBestArm(self):
         # HERE: Choose the stop condition: algorithm has solved problem OR fixed number of steps (better to do averages per step)
         #while not self.algo.isDone():
-        while self.step < FIXED_NB_STEPS:
+        while self.step < self.nb_steps:
             self.doOneStep()
         return self.algo.result()
 
@@ -52,13 +53,15 @@ class Drawer():
         self.output_path_root = "./experiments/" + exp_name
         self.make_dir("./experiments")
         self.make_dir(self.output_path_root)
+        self.H1 = ENVIRONMENT.getH1()
 
     def save_png(self, x, sum_action_step, x_label, y_label, plot_title):
         plt.subplots()
+        x_normalized = [step/self.H1 for step in x]
         for i in range(NB_ARMS):
             y = sum_action_step[i]
             y = smoothen(y)
-            plt.plot(x, y)
+            plt.plot(x_normalized, y)
         plt.title(plot_title)
         plt.xlabel(x_label)
         plt.ylabel(y_label)
@@ -93,18 +96,21 @@ class Drawer():
 
 
 if __name__ == "__main__":
+    nb_steps = int(FIXED_NB_H1 * ENVIRONMENT.getH1())
+    print("Number of steps: " + str(nb_steps))
+
     # Initializing the sum_action_step matrix
         # 1st index: action (1 to 6)
-        # 2nd index: time step (1 to FIXED_NB_STEPS)
+        # 2nd index: time step (1 to nb_steps)
         # Value inside: number of time this action has been chosen, divided by number of runs
     sum_action_step = []
-        a = ([0.0 for k in range(FIXED_NB_STEPS)])
     for i in range(NB_ARMS):
+        a = ([0.0 for k in range(nb_steps)])
         sum_action_step.append(a)
 
-    # Running the MainLoop FIXED_NB_STEPS time and populating the sum_action_step matrix
+    # Running the MainLoop nb_steps time and populating the sum_action_step matrix
     for i in range(NB_RUNS):
-        main_loop = MainLoop()
+        main_loop = MainLoop(nb_steps)
         result = main_loop.findBestArm()
         action_mem = main_loop.get_action_memory()
         for time_step in range(len(action_mem)):
@@ -117,6 +123,6 @@ if __name__ == "__main__":
 
     # Drawing the results
     drawer = Drawer(EXP_NAME)
-    drawer.save_png(range(FIXED_NB_STEPS), sum_action_step, "Number of pulls", "P(I_t = i)", EXP_NAME)
+    drawer.save_png(range(nb_steps), sum_action_step, "Number of pulls (normalized by H1)", "P(I_t = i)", EXP_NAME)
     drawer.save_csv(sum_action_step, EXP_NAME)
 

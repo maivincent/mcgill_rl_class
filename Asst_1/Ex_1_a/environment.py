@@ -20,6 +20,12 @@ class ArticleEnvironment():
     def getOmega(self):
         return self.omega.copy()
 
+    def getH1(self):
+        H1 = 0
+        for mean in self.means:
+            if mean != max(self.means):
+                H1 += (max(self.means) - mean)**(-2)
+        return H1
 
 class BookEnvironment():
     def __init__(self):
@@ -42,3 +48,9 @@ class BookEnvironment():
     def getOmega(self):
         return self.omega.copy()
 
+    def getH1(self):
+        H1 = 0
+        for mean in self.means:
+            if mean != max(self.means):
+                H1 += (max(self.means) - mean)**(-2)
+        return H1
