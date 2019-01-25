@@ -28,3 +28,10 @@ def secondLargest(numbers):
             else:
                 m2 = x
     return m2 if count >= 2 else None
+
+def smoothen(a_list):
+    a = []
+    for i in range(len(a_list) - 1):
+        a.append((a_list[i] + a_list[i+1])/2)
+    a.append(a_list[-1])
+    return a

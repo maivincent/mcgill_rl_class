@@ -1,5 +1,6 @@
 from environment import Environment
 from algorithms import ActionEliminationAlgo, UCBAlgo, LUCBAlgo
+from utils import smoothen
 import matplotlib.pyplot as plt
 import csv
 import os
@@ -52,6 +53,7 @@ class Drawer():
         plt.subplots()
         for i in range(6):
             y = sum_action_step[i]
+            y = smoothen(y)
             plt.plot(x, y)
         plt.title(plot_title)
         plt.xlabel(x_label)
