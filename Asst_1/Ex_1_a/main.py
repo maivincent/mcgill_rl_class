@@ -1,34 +1,35 @@
 from environment import Environment
-from algorithms import ActionEliminationAlgo, UCBAlgo
+from algorithms import ActionEliminationAlgo, UCBAlgo, LUCBAlgo
 import matplotlib.pyplot as plt
 import csv
 import os
 
 
 FIXED_NB_STEPS = 7000
-NB_RUNS = 100
-EXP_NAME = "UBC_1_article"
+NB_RUNS = 30
+EXP_NAME = "LUBC_1_article"
 
 class MainLoop():
     def __init__(self):
         self.delta = 0.1
         self.epsilon = 0.01
-        self.algo = UCBAlgo(self.delta, self.epsilon) # Change here for another algorithm
+        self.algo = LUCBAlgo(self.delta, self.epsilon) # Change here for another algorithm
         self.env = Environment()
         self.action_memory = []
         self.reward_memory = []
         self.step = 0
 
     def doOneStep(self):
-        self.step += 1
+        
+        action_record = self.algo.nextAction()
+        reward = self.env.draw(action_record[0])
+        self.algo.update(action_record[0],reward)
 
-        action = self.algo.nextAction()
-        self.action_memory.append(action)
+        if action_record[1]:
+            self.action_memory.append(action_record[0])
+            self.reward_memory.append(reward)
+            self.step += 1
 
-        reward = self.env.draw(action)
-        self.reward_memory.append(action)
-
-        self.algo.update(action,reward)
 
     def findBestArm(self):
         # HERE: Choose the stop condition: algorithm has solved problem OR fixed number of steps (better to do averages per step)
