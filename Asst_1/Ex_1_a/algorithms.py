@@ -133,9 +133,16 @@ class UCBAlgo():
 
 
     def isDone(self):
+
+        if None in self.est_means or None in self.means_with_bounds:
+            return False
+
+        if self.is_done:
+            return True
+
         curr_best_mean = max(self.est_means)
         best_mean_act = self.est_means.index(curr_best_mean) + 1
-        curr_best_mean_minus_bound = curr_best_mean - bound(best_mean_act)
+        curr_best_mean_minus_bound = curr_best_mean - self.bound(best_mean_act)
 
         second_best_mean_plus_bound = maxExcept(self.means_with_bounds, best_mean_act - 1)
 
