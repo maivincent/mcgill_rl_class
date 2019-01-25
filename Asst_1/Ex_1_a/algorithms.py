@@ -5,9 +5,9 @@ import random
 
 
 class ActionEliminationAlgo():
-    def __init__(self, delta, epsilon):
+    def __init__(self, delta, epsilon, omega):
         self.r = 1
-        self.omega = {1, 2, 3, 4, 5, 6}
+        self.omega = omega
         self.nb_arms = len(self.omega)
         self.est_means = [None for k in range(self.nb_arms)]
         self.received_rewards = [[] for k in range(self.nb_arms)]
@@ -96,8 +96,8 @@ class ActionEliminationAlgo():
 
 
 class UCBAlgo():
-    def __init__(self, delta, epsilon):
-        self.omega = {1, 2, 3, 4, 5, 6}
+    def __init__(self, delta, epsilon, omega):
+        self.omega = omega
         self.est_means = [None for k in range(len(self.omega))]
         self.means_with_bounds = [None for k in range(len(self.omega))]
         self.received_rewards = [[] for k in range(len(self.omega))]
@@ -168,8 +168,8 @@ class UCBAlgo():
 
 
 class LUCBAlgo():
-    def __init__(self, delta, epsilon):
-        self.omega = {1, 2, 3, 4, 5, 6}
+    def __init__(self, delta, epsilon, omega):
+        self.omega = omega
         self.est_means = [None for k in range(len(self.omega))]
         self.means_with_bounds = [None for k in range(len(self.omega))]
         self.received_rewards = [[] for k in range(len(self.omega))]

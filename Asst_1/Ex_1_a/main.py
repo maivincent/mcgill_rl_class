@@ -1,4 +1,4 @@
-from environment import Environment
+from environment import ArticleEnvironment, BookEnvironment
 from algorithms import ActionEliminationAlgo, UCBAlgo, LUCBAlgo
 from utils import smoothen
 import matplotlib.pyplot as plt
@@ -9,13 +9,17 @@ import os
 FIXED_NB_STEPS = 7000
 NB_RUNS = 30
 EXP_NAME = "LUBC_1_article"
+NB_ARMS = 10
+
+ENVIRONMENT = BookEnvironment()
 
 class MainLoop():
     def __init__(self):
         self.delta = 0.1
         self.epsilon = 0.01
-        self.algo = LUCBAlgo(self.delta, self.epsilon) # Change here for another algorithm
-        self.env = Environment()
+        self.env = ENVIRONMENT
+        self.omega = self.env.getOmega()
+        self.algo = ActionEliminationAlgo(self.delta, self.epsilon, self.omega) # Change here for another algorithm
         self.action_memory = []
         self.reward_memory = []
         self.step = 0
@@ -51,7 +55,7 @@ class Drawer():
 
     def save_png(self, x, sum_action_step, x_label, y_label, plot_title):
         plt.subplots()
-        for i in range(6):
+        for i in range(NB_ARMS):
             y = sum_action_step[i]
             y = smoothen(y)
             plt.plot(x, y)
@@ -94,8 +98,8 @@ if __name__ == "__main__":
         # 2nd index: time step (1 to FIXED_NB_STEPS)
         # Value inside: number of time this action has been chosen, divided by number of runs
     sum_action_step = []
-    for i in range(6):
         a = ([0.0 for k in range(FIXED_NB_STEPS)])
+    for i in range(NB_ARMS):
         sum_action_step.append(a)
 
     # Running the MainLoop FIXED_NB_STEPS time and populating the sum_action_step matrix
@@ -107,8 +111,8 @@ if __name__ == "__main__":
             action = action_mem[time_step]
             sum_action_step[action-1][time_step] += 1.0/NB_RUNS
         # Show at which step we are
-        if i % 10 == 0:
-            print(i)
+        if i % (NB_RUNS/500) == 0:
+            print(i * 100 / NB_RUNS)
     #print(str(sum_action_step)) 
 
     # Drawing the results
