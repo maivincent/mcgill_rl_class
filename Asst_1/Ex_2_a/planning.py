@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
 import numpy as np
+from GridWorld import GridWorld
 
 MAX_ITERS = 100000
+LEGAL_ACTIONS = ['LEFT', 'RIGHT', 'UP', 'DOWN']
+
 
 def policy_evaluation(transition, reward, discount=0.9, num_iterations=None, epsilon=.001):
     ''' Policy evaluation implementation, without tensor product optimization
@@ -28,18 +31,18 @@ def policy_evaluation(transition, reward, discount=0.9, num_iterations=None, eps
             break
         
     return v
-        
-def policy_transition_matrix(policy, p):
+
+
+def policy_transition_matrix(policy, n, p):
     ''' Given, a deterministic policy, return the transition dynamics where the
     desired action is taken with probability p and a random action is taken
     with probability (1 - p)
     Args:
-        policy:         |S| x |A| ndarray
+        policy:         |S| length vector of action indices
         
     Returns:
         transition_matrix:  |S| x |S|
     '''
-    num_states, num_actions = policy.shape
-    policy = p * policy + (1 - p) / num_actions * np.ones_like(policy)
-    # TODO
+    gridworld = GridWorld(n, p)
+    return gridworld.get_transition_matrix(rand_policy)
     
