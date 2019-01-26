@@ -25,6 +25,9 @@ class GridWorld:
         self.grid_rewards[upper_left] = 1
         self.grid_rewards[upper_right] = 10
         self.terminal_states = set([upper_left, upper_right])
+        
+    def get_rewards(self):
+        return self.grid_to_vector(self.grid_rewards)
     
     def get_transition_matrix(self, policy):
         '''
