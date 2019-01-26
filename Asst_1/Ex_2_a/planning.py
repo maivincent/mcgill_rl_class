@@ -8,7 +8,7 @@ LEGAL_ACTIONS = ['LEFT', 'RIGHT', 'UP', 'DOWN']
 
 
 def policy_evaluation(transition, reward, discount=0.9, num_iterations=None, epsilon=.001):
-    ''' Policy evaluation implementation, without tensor product optimization
+    ''' Policy evaluation implementation
     Args:
         transition:     |S| x |S| ndarray transition conditioned on the policy
         reward:         |S| x 1 ndarray
@@ -33,7 +33,7 @@ def policy_evaluation(transition, reward, discount=0.9, num_iterations=None, eps
     return v
 
 
-def policy_transition_matrix(policy, n, p):
+def policy_transition_matrix(policy, gridworld):
     ''' Given, a deterministic policy, return the transition dynamics where the
     desired action is taken with probability p and a random action is taken
     with probability (1 - p)
@@ -43,6 +43,16 @@ def policy_transition_matrix(policy, n, p):
     Returns:
         transition_matrix:  |S| x |S|
     '''
-    gridworld = GridWorld(n, p)
-    return gridworld.get_transition_matrix(rand_policy)
+    return gridworld.get_transition_matrix(policy)
+
+
+def policy_improvement(state_values, gridworld):
+    ''' Get greedy policy from given state values
+    Args:
+        state_values:   |S| length vector of values
+        
+    Returns:
+        policy:         |S| length vector of action indices
+    '''
+    return gridworld.get_greedy_policy(state_values)
     
