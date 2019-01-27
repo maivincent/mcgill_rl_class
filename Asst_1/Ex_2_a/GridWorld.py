@@ -43,7 +43,8 @@ class GridWorld:
         for i in range(self.n):
             for j in range(self.n):
                 transition_probs = np.zeros((self.n, self.n))
-                self.set_move_probs(i, j, policy[i, j], transition_probs)
+                if (i, j) not in self.terminal_states:
+                    self.set_move_probs(i, j, policy[i, j], transition_probs)
                 transitions.append(self.grid_to_vector(transition_probs))
         return np.vstack(transitions)
     
