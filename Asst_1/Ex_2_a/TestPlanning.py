@@ -76,6 +76,18 @@ class TestPlanning(unittest.TestCase):
         policy = value_iteration(self.gridworld, self.large_discount)
         actual = int_policy_to_str_policy(policy).reshape(self.n, self.n)
         assert_array_equal(self.policy_large_discount, actual)
+    
+    def test_modified_policy_iteration(self):
+        policy = modified_policy_iteration(self.gridworld, self.discount,
+                                           num_eval_iters=3)
+        actual = int_policy_to_str_policy(policy).reshape(self.n, self.n)
+        assert_array_equal(self.policy, actual)
+        
+    def test_modified_policy_iteration_more_discount(self):
+        policy = modified_policy_iteration(self.gridworld, self.large_discount,
+                                           num_eval_iters=3)
+        actual = int_policy_to_str_policy(policy).reshape(self.n, self.n)
+        assert_array_equal(self.policy_large_discount, actual)
         
 if __name__ == '__main__':
     unittest.main()
