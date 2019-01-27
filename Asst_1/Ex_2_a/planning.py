@@ -23,15 +23,12 @@ def modified_policy_iteration(gridworld, discount=DISCOUNT,
     
     print('discount2:', discount)
     
-    i = -1
+    v = np.zeros(num_states)
     while True:
-#    for i in range(3):
-        i += 1
-        print('i:', i)
         # policy evaluation
         transition = gridworld.get_transition_matrix(policy)
         v = modified_policy_evaluation(
-                transition, reward, discount=discount, 
+                transition, reward, v_init=v, discount=discount, 
                 num_iters=num_eval_iters, epsilon=epsilon_eval)
         
         print(v.reshape(gridworld.n, gridworld.n))
@@ -57,7 +54,7 @@ def value_iteration(gridworld, discount=DISCOUNT):
     return modified_policy_iteration(gridworld, discount, num_eval_iters=1)
     
 
-def modified_policy_evaluation(transition, reward, discount=DISCOUNT, 
+def modified_policy_evaluation(transition, reward, v_init=None, discount=DISCOUNT, 
                                num_iters=None, epsilon=None):
     ''' Generalized policy evaluation
     Args:
@@ -68,7 +65,10 @@ def modified_policy_evaluation(transition, reward, discount=DISCOUNT,
         state values under the given policy
     '''
     num_states = len(reward)
-    v_prev = np.zeros(num_states)
+    if v_init is None:
+        v_prev = np.zeros(num_states)
+    else:
+        v_prev = v_init
     
     # default to full policy evaluation
     if num_iters is None and epsilon is None:
