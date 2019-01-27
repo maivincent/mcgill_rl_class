@@ -10,7 +10,8 @@ EPSILON = 10e-6
 
 
 def modified_policy_iteration(gridworld, discount=DISCOUNT, 
-                              num_eval_iters=None, epsilon_eval=None, seed=0):
+                              num_eval_iters=None, epsilon_eval=None, seed=0,
+                              return_all_policies=False):
     ''' Generalized policy iteration
 
     Returns:
@@ -23,6 +24,7 @@ def modified_policy_iteration(gridworld, discount=DISCOUNT,
     
     print('discount2:', discount)
     
+    policies = []
     v = np.zeros(num_states)
     while True:
         # policy evaluation
@@ -31,27 +33,35 @@ def modified_policy_iteration(gridworld, discount=DISCOUNT,
                 transition, reward, v_init=v, discount=discount, 
                 num_iters=num_eval_iters, epsilon=epsilon_eval)
         
-        print(v.reshape(gridworld.n, gridworld.n))
+#        print(v.reshape(gridworld.n, gridworld.n))
         
         # policy improvement
         new_policy = gridworld.get_greedy_policy(v)
         if np.all(policy == new_policy):
             break
-        policy = new_policy
         
-        print(int_policy_to_str_policy(policy).reshape(gridworld.n, gridworld.n))
+        policy = new_policy
+        policies.append(policy)
+        
+#        print(int_policy_to_str_policy(policy).reshape(gridworld.n, gridworld.n))
     
-    return policy
+    if return_all_policies:
+        return policies
+    else:
+        return policy
 
 
-def policy_iteration(gridworld, discount=DISCOUNT):
-    print('discount1:', discount)
+def policy_iteration(gridworld, discount=DISCOUNT, seed=0,
+                     return_all_policies=False):
     return modified_policy_iteration(gridworld, discount,
-                            num_eval_iters=MAX_ITERS, epsilon_eval=EPSILON)
+                            num_eval_iters=MAX_ITERS, epsilon_eval=EPSILON,
+                            seed=seed, return_all_policies=return_all_policies)
     
 
-def value_iteration(gridworld, discount=DISCOUNT):
-    return modified_policy_iteration(gridworld, discount, num_eval_iters=1)
+def value_iteration(gridworld, discount=DISCOUNT, seed=0,
+                    return_all_policies=False):
+    return modified_policy_iteration(gridworld, discount, num_eval_iters=1,
+                            seed=seed, return_all_policies=return_all_policies)
     
 
 def modified_policy_evaluation(transition, reward, v_init=None, discount=DISCOUNT, 

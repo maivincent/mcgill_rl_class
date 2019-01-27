@@ -89,5 +89,6 @@ class TestPlanning(unittest.TestCase):
         actual = int_policy_to_str_policy(policy).reshape(self.n, self.n)
         assert_array_equal(self.policy_large_discount, actual)
         
+        
 if __name__ == '__main__':
     unittest.main()
