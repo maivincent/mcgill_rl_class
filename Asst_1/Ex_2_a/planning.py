@@ -1,44 +1,65 @@
 #!/usr/bin/env python3
 
 import numpy as np
-from GridWorld import GridWorld
+from GridWorld import LEGAL_ACTIONS
+from GridWorld import int_policy_to_str_policy
 
 MAX_ITERS = 100000
-LEGAL_ACTIONS = ['LEFT', 'RIGHT', 'UP', 'DOWN']
+DISCOUNT = 0.9
 EPSILON = 10e-6
 
 
-def modified_policy_iteration(gridworld, discount=0.9, 
-                              num_eval_iters=None, epsilon_eval=None):
-    ''' Generalized policy iteration implementation
-    Args:
-        transition:     |S| x |S| ndarray transition conditioned on the policy
-        reward:         |S| x 1 ndarray
-        
+def modified_policy_iteration(gridworld, discount=DISCOUNT, 
+                              num_eval_iters=None, epsilon_eval=None, seed=0):
+    ''' Generalized policy iteration
+
     Returns:
         state values under the given policy
     '''
+    np.random.seed(seed)
     num_states = gridworld.n ** 2
     reward = gridworld.get_rewards()
-    policy = np.random.choice(range(len(gridworld.LEGAL_ACTIONS)), num_states)
+    policy = np.random.choice(range(len(LEGAL_ACTIONS)), num_states)
     
+    print('discount2:', discount)
+    
+    i = -1
     while True:
+#    for i in range(3):
+        i += 1
+        print('i:', i)
         # policy evaluation
         transition = gridworld.get_transition_matrix(policy)
         v = modified_policy_evaluation(
                 transition, reward, discount=discount, 
                 num_iters=num_eval_iters, epsilon=epsilon_eval)
         
+        print(v.reshape(gridworld.n, gridworld.n))
+        
         # policy improvement
         new_policy = gridworld.get_greedy_policy(v)
-        if policy == new_policy:
+        if np.all(policy == new_policy):
             break
+        policy = new_policy
+        
+        print(int_policy_to_str_policy(policy).reshape(gridworld.n, gridworld.n))
     
     return policy
 
-def modified_policy_evaluation(transition, reward, discount=0.9, 
+
+def policy_iteration(gridworld, discount=DISCOUNT):
+    print('discount1:', discount)
+    return modified_policy_iteration(gridworld, discount,
+                            num_eval_iters=MAX_ITERS, epsilon_eval=EPSILON)
+    
+
+def value_iteration(gridworld, discount=DISCOUNT):
+    return modified_policy_iteration(gridworld, discount, num_eval_iters=1)
+    
+
+def modified_policy_evaluation(transition, reward, discount=DISCOUNT, 
                                num_iters=None, epsilon=None):
-    ''' Modified policy evaluation implementation
+    ''' Generalized policy evaluation
     Args:
         transition:     |S| x |S| ndarray transition conditioned on the policy
         reward:         |S| x 1 ndarray
@@ -49,19 +70,23 @@ def modified_policy_evaluation(transition, reward, discount=0.9,
     num_states = len(reward)
     v_prev = np.zeros(num_states)
     
+    # default to full policy evaluation
     if num_iters is None and epsilon is None:
         epsilon = EPSILON
         num_iters = MAX_ITERS
-
+        
     for _ in range(num_iters):
         v = reward + discount * transition @ v_prev
         delta = np.max(np.abs(v - v_prev))
         if epsilon is not None and delta < epsilon:
             break
+        v_prev = v
     return v
 
-def full_policy_evaluation(transition, reward, discount=0.9):
+
+def full_policy_evaluation(transition, reward, discount=DISCOUNT):
     return modified_policy_evaluation(transition, reward, discount=discount)
+
 
 def policy_transition_matrix(policy, gridworld):
     ''' Given, a deterministic policy, return the transition dynamics where the

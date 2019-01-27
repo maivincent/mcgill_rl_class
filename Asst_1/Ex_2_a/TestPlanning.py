@@ -3,17 +3,31 @@
 import unittest
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
-from GridWorld import GridWorld
-from planning import policy_transition_matrix, full_policy_evaluation
+from GridWorld import GridWorld, int_policy_to_str_policy
+from planning import policy_transition_matrix, full_policy_evaluation, \
+    policy_iteration, value_iteration, modified_policy_iteration
 
-class TestStringMethods(unittest.TestCase):
+class TestPlanning(unittest.TestCase):
     
     def setUp(self):
         self.n = 5
         self.p = 1
         self.gridworld = GridWorld(self.n, self.p)
         self.go_right_policy = np.ones(self.n * self.n, dtype=int)
-        self.discount = .9
+        self.discount = 0.9
+        self.large_discount = 0.2
+        self.policy = np.array(
+                [['TERMINAL', 'RIGHT', 'RIGHT', 'RIGHT', 'TERMINAL'],
+                 ['RIGHT', 'RIGHT', 'RIGHT', 'RIGHT', 'UP'],
+                 ['RIGHT', 'RIGHT', 'RIGHT', 'RIGHT', 'UP'],
+                 ['RIGHT', 'RIGHT', 'RIGHT', 'RIGHT', 'UP'],
+                 ['RIGHT', 'RIGHT', 'RIGHT', 'RIGHT', 'UP']])
+        self.policy_large_discount = np.array(
+                [['TERMINAL', 'LEFT', 'RIGHT', 'RIGHT', 'TERMINAL'],
+                 ['UP', 'LEFT', 'RIGHT', 'RIGHT', 'UP'],
+                 ['UP', 'LEFT', 'RIGHT', 'RIGHT', 'UP'],
+                 ['UP', 'LEFT', 'RIGHT', 'RIGHT', 'UP'],
+                 ['UP', 'LEFT', 'RIGHT', 'RIGHT', 'UP']])
     
     def test_transition_matrix(self):
         transition_rows = []
@@ -42,7 +56,16 @@ class TestStringMethods(unittest.TestCase):
         expected = expected.flatten()
         
         assert_array_almost_equal(expected, actual)
-
-
+#        
+    def test_policy_iteration(self):
+        policy = policy_iteration(self.gridworld, self.discount)
+        actual = int_policy_to_str_policy(policy).reshape(self.n, self.n)
+        assert_array_equal(self.policy, actual)
+        
+    def test_policy_iteration_more_discount(self):
+        policy = policy_iteration(self.gridworld, self.large_discount)
+        actual = int_policy_to_str_policy(policy).reshape(self.n, self.n)
+        assert_array_equal(self.policy_large_discount, actual)
+        
 if __name__ == '__main__':
     unittest.main()

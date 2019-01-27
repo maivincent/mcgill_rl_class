@@ -5,11 +5,25 @@ import random
 
 BOTTOM_LEFT = 'bottom left'
 LEGAL_ACTIONS = ['LEFT', 'RIGHT', 'UP', 'DOWN']
+TERMINAL_I = len(LEGAL_ACTIONS)
+
+@np.vectorize
+def int_policy_to_str_policy(action_i):
+    if action_i == TERMINAL_I:
+        return 'TERMINAL'
+    elif 0 <= action_i < len(LEGAL_ACTIONS):
+        return LEGAL_ACTIONS[action_i]
+    else:
+        raise ValueError(
+                'Illegal action index: {} ... Legal action indices: {}-{}'
+                         .format(action_i, 0, len(LEGAL_ACTIONS) - 1))
+        
 
 class GridWorld:
     
-    def __init__(self, n, p, discount=0.9, agent_start=BOTTOM_LEFT, seed=0):
-        random.seed(seed)
+    def __init__(self, n, p, discount=0.9, agent_start=BOTTOM_LEFT, seed=None):
+        if seed is not None:
+            random.seed(seed)
         self.n = n
         self.grid_rewards = np.zeros((n, n))
         self.p = p
@@ -58,12 +72,15 @@ class GridWorld:
         '''
         assert len(values) == self.n * self.n
         values = self.vector_to_grid(values)
-        policy = np.zeros_like(values)
+        policy = np.zeros_like(values, dtype=int)
         for i in range(self.n):
             for j in range(self.n):
-                local_vals = [values[self.get_inbounds_loc(i, j, action)] \
-                                for action in LEGAL_ACTIONS]
-                policy[i, j] = np.argmax(local_vals)
+                if (i, j) in self.terminal_states:
+                    policy[i, j] = TERMINAL_I
+                else:
+                    local_vals = [values[self.get_inbounds_loc(i, j, action)] \
+                                         for action in LEGAL_ACTIONS]
+                    policy[i, j] = np.argmax(local_vals)
         return self.grid_to_vector(policy)
     
     def vector_to_grid(self, v):
@@ -73,6 +90,8 @@ class GridWorld:
         return grid.flatten()
     
     def set_move_probs(self, i, j, action_i, transition_probs):
+        if action_i == TERMINAL_I:
+            raise Exception('Terminal_i')
         action_loc = self.get_inbounds_loc(i, j, LEGAL_ACTIONS[action_i])
         transition_probs[action_loc] = self.p
         for action in LEGAL_ACTIONS:
