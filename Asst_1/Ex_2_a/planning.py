@@ -6,10 +6,11 @@ from GridWorld import int_policy_to_str_policy
 
 MAX_ITERS = 100000
 DISCOUNT = 0.9
-EPSILON = 10e-6
+#EPSILON = 10e-6
+EPSILON = 10e-4
 
 
-def modified_policy_iteration(gridworld, discount=DISCOUNT, 
+def modified_policy_iteration(gridworld, discount=DISCOUNT, epsilon=EPSILON,
                               num_eval_iters=None, epsilon_eval=None, seed=0,
                               return_all_policies=False):
     ''' Generalized policy iteration
@@ -21,25 +22,25 @@ def modified_policy_iteration(gridworld, discount=DISCOUNT,
     num_states = gridworld.n ** 2
     reward = gridworld.get_rewards()
     policy = np.random.choice(range(len(LEGAL_ACTIONS)), num_states)
-    
-    print('discount2:', discount)
-    
+        
     policies = []
-    v = np.zeros(num_states)
+    v_prev = np.zeros(num_states)
     while True:
         # policy evaluation
         transition = gridworld.get_transition_matrix(policy)
         v = modified_policy_evaluation(
-                transition, reward, v_init=v, discount=discount, 
+                transition, reward, v_init=v_prev, discount=discount, 
                 num_iters=num_eval_iters, epsilon=epsilon_eval)
         
 #        print(v.reshape(gridworld.n, gridworld.n))
         
         # policy improvement
         new_policy = gridworld.get_greedy_policy(v)
-        if np.all(policy == new_policy):
+        
+        if np.all(policy == new_policy) or np.max(np.abs(v - v_prev)) < epsilon:
             break
         
+        v_prev = v
         policy = new_policy
         policies.append(policy)
         
@@ -95,7 +96,8 @@ def modified_policy_evaluation(transition, reward, v_init=None, discount=DISCOUN
 
 
 def full_policy_evaluation(transition, reward, discount=DISCOUNT):
-    return modified_policy_evaluation(transition, reward, discount=discount)
+    return modified_policy_evaluation(transition, reward, discount=discount,
+                                      num_iters=MAX_ITERS, epsilon=EPSILON)
 
 
 def policy_transition_matrix(policy, gridworld):
