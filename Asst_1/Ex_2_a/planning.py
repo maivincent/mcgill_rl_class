@@ -23,7 +23,7 @@ def modified_policy_iteration(gridworld, discount=DISCOUNT, epsilon=EPSILON,
     reward = gridworld.get_rewards()
     policy = np.random.choice(range(len(LEGAL_ACTIONS)), num_states)
         
-    policies = []
+    policies = [policy]
     v_prev = np.zeros(num_states)
     while True:
         # policy evaluation
