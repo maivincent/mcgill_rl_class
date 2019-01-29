@@ -112,38 +112,3 @@ class GridWorld:
                              .format(action, LEGAL_ACTIONS))
         return (max(0, min(dest[0], self.n - 1)),
                 max(0, min(dest[1], self.n - 1)))
-    
-
-# =============================================================================
-#     Potentially to remove below
-# =============================================================================
-        
-    def get_state(self):
-        return self.agent_loc
-    
-    def take_action(self, action):
-        if self.agent_loc in self.terminal_states:
-            return None
-        if random.random <= self.p:
-            self.move(action.upper())
-        else:
-            self.move(random.choice(['LEFT', 'RIGHT', 'UP', 'DOWN']))
-        return self.grid_rewards[self.agent_loc]
-    
-    def move(self, action):
-        if action == 'LEFT':
-            self.agent_loc = (self.agent_loc[0], self.agent_loc[1] - 1)
-        elif action == 'RIGHT':
-            self.agent_loc = (self.agent_loc[0], self.agent_loc[1] + 1)
-        elif action == 'UP':
-            self.agent_loc = (self.agent_loc[0] - 1, self.agent_loc[1])
-        elif action == 'DOWN':
-            self.agent_loc = (self.agent_loc[0] + 1, self.agent_loc[1])
-        else:
-            raise ValueError('Illegal action: \'{}\' ... Legal actions: {}'
-                             .format(action, LEGAL_ACTIONS))
-        self.keep_inbounds()
-    
-    def keep_inbounds(self):
-        self.agent_loc = (max(0, min(self.agent_loc[0], self.n - 1)),
-                          max(0, min(self.agent_loc[1], self.n - 1)))

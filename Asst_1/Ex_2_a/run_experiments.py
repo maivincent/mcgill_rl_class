@@ -30,7 +30,6 @@ def get_bottom_corner_lists(policies, gridworld, discount):
 def plot_bottom_corner_vals(value_lists, labels, title):
     plt.figure()
     for i, value_list in enumerate(value_lists):
-#        plt.plot(range(len(value_list)), value_list, label=labels[i])
         plt.plot(value_list, label=labels[i])
     plt.title(title)
     plt.xlabel('number of policy iterations')

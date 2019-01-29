@@ -31,9 +31,7 @@ def modified_policy_iteration(gridworld, discount=DISCOUNT, epsilon=EPSILON,
         v = modified_policy_evaluation(
                 transition, reward, v_init=v_prev, discount=discount, 
                 num_iters=num_eval_iters, epsilon=epsilon_eval)
-        
-#        print(v.reshape(gridworld.n, gridworld.n))
-        
+                
         # policy improvement
         new_policy = gridworld.get_greedy_policy(v)
         
@@ -43,9 +41,7 @@ def modified_policy_iteration(gridworld, discount=DISCOUNT, epsilon=EPSILON,
         v_prev = v
         policy = new_policy
         policies.append(policy)
-        
-#        print(int_policy_to_str_policy(policy).reshape(gridworld.n, gridworld.n))
-    
+            
     if return_all_policies:
         return policies
     else:
