@@ -43,6 +43,7 @@ In *main.py*, you can change the algorithm you wish to use in the `MainLoop __in
     * `MainLoop` is where one episode is run. You can change the end condition (number of steps, or solved condition achieved) in the `findBestArm` function.
     * `Drawer` is where the result plots are created and saved. It could also save csv files - but this has not been implemented yet.
     
-    
+
+## Ex. 2 a) Value iteration, policy iteration, and modified policy iteration
   
-  
+  Run ```python run_experiments.py```
