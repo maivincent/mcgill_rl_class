@@ -1,0 +1,10 @@
+# Contains dependencies without specific verions
+# run: conda env create -f environment.yml
+name: rl-gym
+dependencies:
+- matplotlib
+- numpy
+- python=3
+- unittest
+- pip:
+  - gym
