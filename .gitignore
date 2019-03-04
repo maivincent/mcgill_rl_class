@@ -1,8 +1,14 @@
 
-*.pyc
+*.pyc/Users/brady/Development/mcgill_rl_class/.gitignore
 
 Asst_1/Ex_1_a/experiments/action_elimination_article/ActionEliminationSampling\.png
 
 Asst_1/Ex_1_a/experiments/action_elimination_article/ActionEliminationSampling\.csv
 
 *.csv#
+
+# Brady's additions
+*.pdf
+*.DS_Store
+*.zip
+
