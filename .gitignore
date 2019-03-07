@@ -1,5 +1,5 @@
 
-*.pyc/Users/brady/Development/mcgill_rl_class/.gitignore
+*.pyc
 
 Asst_1/Ex_1_a/experiments/action_elimination_article/ActionEliminationSampling\.png
 
@@ -11,8 +11,5 @@ Asst_1/Ex_1_a/experiments/action_elimination_article/ActionEliminationSampling\.
 *.pdf
 *.DS_Store
 *.zip
-
-
-*.pyc
 
 *.png
