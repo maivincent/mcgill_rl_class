@@ -37,6 +37,9 @@ class TDAgent_Q(object):
     def update(self, info):
         pass
 
+    def updateNoLearn(self, reward):
+        self.ret += reward
+
     def nextAct(self, state):
         return 0
 
@@ -46,10 +49,22 @@ class TDAgent_Q(object):
     def getReturn(self):
         return self.ret
 
+    def nextAct(self, state):
+        state_q_vals = self.getStateQValues(state)
+        action = draw_softmax(self.action_list, state_q_vals, self.temperature)
+        return action
+
     def nextGreedyAct(self, state):
         state_q_vals = self.getStateQValues(state)
-        max_q = max(state_q_vals)
-        return state_q_vals.index(max_q)        
+        action = draw_max(self.action_list, state_q_vals)
+        return action
+
+    def reset(self):
+        self.q_values = {}
+        self.ret = 0
+
+    def partialReset(self):
+        self.ret = 0
 
 class RandomAgent(TDAgent_Q):
     def __init__(self, environment, parameters):
@@ -85,11 +100,6 @@ class Sarsa(TDAgent_Q):
 
         self.ret += R
 
-    def nextAct(self, state):
-        state_q_vals = self.getStateQValues(state)
-        action = draw_softmax(self.action_list, state_q_vals, self.temperature)
-        return action
-
 class QLearning(TDAgent_Q):
     def __init__(self, environment, parameters):
         super().__init__(environment, parameters)
@@ -112,11 +122,6 @@ class QLearning(TDAgent_Q):
         self.setQValue(S, A, new_q)
 
         self.ret += R
-
-    def nextAct(self, state):
-        state_q_vals = self.getStateQValues(state)
-        action = draw_softmax(self.action_list, state_q_vals, self.temperature)
-        return action
 
 class ExpectedSarsa(TDAgent_Q):
     def __init__(self, environment, parameters):
@@ -143,7 +148,3 @@ class ExpectedSarsa(TDAgent_Q):
 
         self.ret += R
 
-    def nextAct(self, state):
-        state_q_vals = self.getStateQValues(state)
-        action = draw_softmax(self.action_list, state_q_vals, self.temperature)
-        return action

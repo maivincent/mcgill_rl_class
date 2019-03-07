@@ -14,10 +14,12 @@ NB_RUNS = 10
 NB_SEGMENTS = 100
 NB_EPISODES = 10
 ACTIONLIST = [0, 1, 2, 3, 4, 5]
-TEMPERATURE = 1
+TEMPERATURE = 0.01
 GAMMA = 1
 ALPHA = 0.5
 PARAMS = {"action_list": ACTIONLIST, "temperature": TEMPERATURE, "alpha":ALPHA, "gamma":GAMMA}
+ENVIRONMENT = gym.make('Taxi-v2')
+ALGORITHM = Sarsa(ENVIRONMENT, PARAMS)
 
 
 class Drawer():
@@ -98,45 +100,83 @@ class Drawer():
                 print ("Successfully created the directory %s " % path) 
 
 
+class Trainer(object):
+    def __init__(self, env, algo, drawer):
+        self.env = env
+        self.algo = algo
+        self.drawer = drawer
 
 
+    def trainOneEpisode(self):
+        self.algo.partialReset()
+        done = 0
+        state = self.env.reset()
+        action = self.algo.nextAct(state)
+        while not done:
+            next_state, reward, done, _ = self.env.step(action)
+            next_action = self.algo.nextAct(next_state)
+            self.algo.update([state, action, reward, next_state, next_action])
+            state = next_state
+            action = next_action
+        return self.algo.getReturn()
+
+    def testOneEpisode(self):
+        self.algo.partialReset()
+        done = 0
+        state = self.env.reset()
+        action = self.algo.nextAct(state)
+        while not done:
+            next_state, reward, done, _ = self.env.step(action)
+            next_action = self.algo.nextGreedyAct(next_state)
+            self.algo.updateNoLearn(reward)
+            #self.algo.update([state, action, reward, next_state, next_action])
+            state = next_state
+            action = next_action
+        return self.algo.getReturn()
+
+    def evalAvgReturn(self):
+        avg_train_ret = 0
+        avg_test_ret = 0
+        for run in range(NB_RUNS):
+            self.algo.reset()
+            for seg in range(NB_SEGMENTS - 1):
+                print("Training run:" + str(run) + ", segment: " + str(seg))
+                # Training episodes
+                for episode in range(NB_EPISODES):
+                    self.trainOneEpisode()
+
+            # Getting "training data" in the last segment
+            print("Getting training performance at run:" + str(run))
+            for episode in range(NB_EPISODES):
+                train_ret = self.trainOneEpisode()
+                if train_ret < 0:
+                    print("*** NEGATIVE TRAINING PERFORMANCE: " + str(train_ret))
+                avg_train_ret += (train_ret - avg_train_ret)/(run*NB_EPISODES + episode + 1)
+            print("Training performance average:" + str(avg_train_ret))
 
 
+            # Geting "testing data" with greedy policy after training
+            print("Getting testing performance at run:" + str(run))
+            for episode in range(10):
+                test_ret = self.testOneEpisode()
+                if test_ret < 0:
+                    print("*** NEGATIVE TESTING PERFORMANCE: " + str(test_ret))
+                avg_test_ret += (test_ret - avg_test_ret)/(run*10 + episode + 1)        
+            print("Testing performance average:" + str(avg_test_ret))
 
 if __name__ == '__main__':
-    exp_name = "Try"
+    exp_name = "Try_2"
+    env = ENVIRONMENT
     drawer = Drawer(exp_name)
-    env = gym.make('Taxi-v2')
-    avg_ret = [0 for seg in range(NB_SEGMENTS)]
-    
-    for run in range(NB_RUNS):
-        algo = ExpectedSarsa(env, PARAMS)
-        for seg in range(NB_SEGMENTS):
-            # Training episodes
-            for episode in range(NB_EPISODES):
-                done = 0
-                state = env.reset()
-                action = algo.nextAct(state)
-                while not done:
-                    next_state, reward, done, _ = env.step(action)
-                    next_action = algo.nextAct(next_state)
-                    algo.update([state, action, reward, next_state, next_action])
-                    state = next_state
-                    action = next_action
+    avg_train_ret = 0
+    avg_test_ret = 0
+    algo = ALGORITHM
 
-            # Optimal policy episode
-            print("Best policy for run:" + str(run) + ", segment: " + str(seg))
-            done = 0
-            state = env.reset()
-            action = algo.nextGreedyAct(state)
-            while not done:
-                next_state, reward, done, _ = env.step(action)
-                next_action = algo.nextGreedyAct(next_state)
-                state = next_state
-                action = next_action
-            ret = algo.getReturn()
-            avg_ret[seg] += (ret - avg_ret[seg])/(seg+1)
+    trainer = Trainer(env, algo, drawer)
+
+    trainer.evalAvgReturn()
 
 
-    drawer.savePlotPNG(range(NB_SEGMENTS),avg_ret, "Episode", "Average return", "Average return on Taxi using algo: " + algo.getName() + ", temp: " + str(TEMPERATURE) + ", learning rate: " + str(ALPHA))
+
+   # drawer.savePlotPNG(range(NB_SEGMENTS),avg_ret, "Episode", "Average return", "Average return on Taxi using algo: " + algo.getName() + ", temp: " + str(TEMPERATURE) + ", learning rate: " + str(ALPHA))
  
