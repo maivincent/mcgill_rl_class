@@ -50,8 +50,12 @@ def get_tile_coding(env):
 
 def plot_vals(value_lists, labels, title):
     plt.figure()
+    x = list(range(1, NUM_EPISODES + 1))
     for i, value_list in enumerate(value_lists):
-        plt.plot(value_list, label=labels[i])
+        mean = np.mean(value_list, axis=0)
+        std = np.std(value_list, axis=0)
+        plt.plot(x, mean, label=labels[i])
+        plt.fill_between(x, mean - std, mean + std, alpha=0.3)
     plt.title(title)
     plt.xlabel('number of episodes')
     plt.ylabel('initial state value under fixed policy')
@@ -67,13 +71,15 @@ if __name__ == '__main__':
 #    start_state = np.array([np.pi/2, 0])    # pendulum to left
 #    start_state = np.array([-np.pi/2, 0])   # pendulum to right
     value_lists = []
-    for seed in range(1):
-        for lr in LRS:
+    for lr in LRS:
+        value_seeds = np.zeros((NUM_SEEDS, NUM_EPISODES))
+        for seed in range(NUM_SEEDS):
             print('lr:', lr)
             np.random.seed(seed)
             tc = get_tile_coding(env)
-            values = mc_eval(env, policy, tc, lr, start_state, NUM_EPISODES)
-            value_lists.append(values)
-        plot_vals(value_lists, ['lr={}'.format(lr) for lr in LRS], 'Monte Carlo')
+            value_seeds[seed, :] = mc_eval(env, policy, tc, lr, start_state,
+                                           NUM_EPISODES)
+        value_lists.append(value_seeds)
+    plot_vals(value_lists, ['lr={}'.format(lr) for lr in LRS], 'Monte Carlo')
         
     
