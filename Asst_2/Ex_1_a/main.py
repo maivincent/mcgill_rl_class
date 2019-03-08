@@ -21,7 +21,6 @@ class Drawer():
         nb_arms = len(sum_action_step)
         for i in range(nb_arms):
             y = sum_action_step[i]
-            y = smoothen(y)
             plt.plot(x, y)
         plt.title(plot_title)
         plt.xlabel(x_label)
@@ -42,7 +41,6 @@ class Drawer():
         plt.subplots()
         for y_id in range(len(y_list)):
             y = y_list[y_id]
-            y_smooth = smoothen(y)
             if legend:
                 plt.plot(x,y, label = legend[y_id])
         if legend:
@@ -134,6 +132,8 @@ class Trainer(object):
         nb_episodes = numbers[2]
         avg_train_ret = 0
         avg_test_ret = 0
+
+        test_returns = []
         for run in range(nb_runs):
             print("Training run:" + str(run))
 
@@ -142,7 +142,7 @@ class Trainer(object):
                 # Training episodes
                 for episode in range(nb_episodes):
                     self.trainOneEpisode()
-                self.testOneEpisode()
+                test_returns.append(self.testOneEpisode())
 
             # Getting "training data" in the last segment
             for episode in range(nb_episodes):
@@ -153,9 +153,10 @@ class Trainer(object):
             # Geting "testing data" with greedy policy after training
             for episode in range(1):
                 test_ret = self.testOneEpisode(learn = learn)
-                avg_test_ret += (test_ret - avg_test_ret)/(run*10 + episode + 1)        
+                avg_test_ret += (test_ret - avg_test_ret)/(run*10 + episode + 1)   
+                test_returns.append(test_ret)     
 
-        return avg_train_ret, avg_test_ret
+        return avg_train_ret, avg_test_ret, test_returns
 
 if __name__ == '__main__':
     exp_name = "Try_2"
@@ -168,23 +169,31 @@ if __name__ == '__main__':
     nb_episodes = 10
     gamma = 1
     
-    alpha = 0.5
-    temperature = 1
+    alphas = [0.1, 0.5, 1]
+    temperatures = [0.1, 1, 10]
     learn = True
 
+    avgs_train = []
+    avgs_test = []
 
-    for temp
-    algo_params = {"action_list": action_list, "temperature": temperature, "alpha":alpha, "gamma":gamma}
-    algo = Sarsa(env, algo_params)
+    for temperature in temperatures:
+        avgs_train.append([])
+        avgs_test.append([])
 
-    drawer = Drawer(exp_name)
+        for alpha in alphas:
+            print("--- Temperature: " + str(temperature) + ", learning rate: " + str(alpha))
+            algo_params = {"action_list": action_list, "temperature": temperature, "alpha":alpha, "gamma":gamma}
+            algo = Sarsa(env, algo_params)
+
+            drawer = Drawer(exp_name)
    
-    trainer = Trainer(env, algo, drawer)
-    trainer.evalAvgReturn([nb_runs, nb_segments, nb_episodes], learn)
+            trainer = Trainer(env, algo, drawer)
+            avg_train, avg_test, test_returns = trainer.evalAvgReturn([nb_runs, nb_segments, nb_episodes], learn)
+            avgs_train[-1].append(avg_train)
+            avgs_test[-1].append(avg_test)
 
 
 
-
-
-   # drawer.savePlotPNG(range(NB_SEGMENTS),avg_ret, "Episode", "Average return", "Average return on Taxi using algo: " + algo.getName() + ", temp: " + str(TEMPERATURE) + ", learning rate: " + str(ALPHA))
+    drawer.saveMultiPlotPNG(alphas, avgs_train, "Learning rate", "Average return", "Taxi task: average return on training using algo: " + algo.getName(), legend = ["Temp: " + str(temp) for temp in temperatures])
+    drawer.saveMultiPlotPNG(alphas, avgs_test, "Learning rate", "Average return",  "Taxi task: average return on testing (learn) using algo: " + algo.getName(), legend = ["Temp: " + str(temp) for temp in temperatures])
  
