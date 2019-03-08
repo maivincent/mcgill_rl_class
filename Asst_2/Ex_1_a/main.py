@@ -10,18 +10,6 @@ import copy
 
 
 
-NB_RUNS = 10
-NB_SEGMENTS = 100
-NB_EPISODES = 10
-ACTIONLIST = [0, 1, 2, 3, 4, 5]
-TEMPERATURE = 0.01
-GAMMA = 1
-ALPHA = 0.5
-PARAMS = {"action_list": ACTIONLIST, "temperature": TEMPERATURE, "alpha":ALPHA, "gamma":GAMMA}
-ENVIRONMENT = gym.make('Taxi-v2')
-ALGORITHM = Sarsa(ENVIRONMENT, PARAMS)
-
-
 class Drawer():
     def __init__(self, exp_name):
         self.output_path_root = "./experiments/" + exp_name
@@ -120,61 +108,81 @@ class Trainer(object):
             action = next_action
         return self.algo.getReturn()
 
-    def testOneEpisode(self):
+    def testOneEpisode(self, learn = False, render = False):
         self.algo.partialReset()
         done = 0
         state = self.env.reset()
-        action = self.algo.nextAct(state)
+        action = self.algo.nextGreedyAct(state)
+        if render: 
+            print(" -------- New episode -------")
+            env.render()
         while not done:
             next_state, reward, done, _ = self.env.step(action)
+            if render: 
+                env.render()
             next_action = self.algo.nextGreedyAct(next_state)
-            self.algo.updateNoLearn(reward)
-            #self.algo.update([state, action, reward, next_state, next_action])
+            if learn: self.algo.update([state, action, reward, next_state, next_action])
+            else: self.algo.updateNoLearn(reward)
             state = next_state
             action = next_action
+        ret = self.algo.getReturn()
         return self.algo.getReturn()
 
-    def evalAvgReturn(self):
+    def evalAvgReturn(self, numbers, learn):
+        nb_runs = numbers[0]
+        nb_segments = numbers[1]
+        nb_episodes = numbers[2]
         avg_train_ret = 0
         avg_test_ret = 0
-        for run in range(NB_RUNS):
+        for run in range(nb_runs):
+            print("Training run:" + str(run))
+
             self.algo.reset()
-            for seg in range(NB_SEGMENTS - 1):
-                print("Training run:" + str(run) + ", segment: " + str(seg))
+            for seg in range(nb_segments - 1):
                 # Training episodes
-                for episode in range(NB_EPISODES):
+                for episode in range(nb_episodes):
                     self.trainOneEpisode()
+                self.testOneEpisode()
 
             # Getting "training data" in the last segment
-            print("Getting training performance at run:" + str(run))
-            for episode in range(NB_EPISODES):
+            for episode in range(nb_episodes):
                 train_ret = self.trainOneEpisode()
-                if train_ret < 0:
-                    print("*** NEGATIVE TRAINING PERFORMANCE: " + str(train_ret))
-                avg_train_ret += (train_ret - avg_train_ret)/(run*NB_EPISODES + episode + 1)
-            print("Training performance average:" + str(avg_train_ret))
+                avg_train_ret += (train_ret - avg_train_ret)/(run*nb_episodes + episode + 1)
 
 
             # Geting "testing data" with greedy policy after training
-            print("Getting testing performance at run:" + str(run))
-            for episode in range(10):
-                test_ret = self.testOneEpisode()
-                if test_ret < 0:
-                    print("*** NEGATIVE TESTING PERFORMANCE: " + str(test_ret))
+            for episode in range(1):
+                test_ret = self.testOneEpisode(learn = learn)
                 avg_test_ret += (test_ret - avg_test_ret)/(run*10 + episode + 1)        
-            print("Testing performance average:" + str(avg_test_ret))
+
+        return avg_train_ret, avg_test_ret
 
 if __name__ == '__main__':
     exp_name = "Try_2"
-    env = ENVIRONMENT
+    env = gym.make('Taxi-v2')
+    action_list = [0, 1, 2, 3, 4, 5]
+
+
+    nb_runs = 10
+    nb_segments = 100
+    nb_episodes = 10
+    gamma = 1
+    
+    alpha = 0.5
+    temperature = 1
+    learn = True
+
+
+    for temp
+    algo_params = {"action_list": action_list, "temperature": temperature, "alpha":alpha, "gamma":gamma}
+    algo = Sarsa(env, algo_params)
+
     drawer = Drawer(exp_name)
-    avg_train_ret = 0
-    avg_test_ret = 0
-    algo = ALGORITHM
-
+   
     trainer = Trainer(env, algo, drawer)
+    trainer.evalAvgReturn([nb_runs, nb_segments, nb_episodes], learn)
 
-    trainer.evalAvgReturn()
+
 
 
 
