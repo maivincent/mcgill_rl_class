@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import sys
 
 MAX_TIME_STEPS = 300    # Pendulum env should finish after 200
 
@@ -36,7 +37,6 @@ def mc_eval(env, policy, tc, lr, start_state, num_episodes):
 #    values = [np.sum(w[tc(start_state)])]
     values = []
     for i in range(num_episodes):
-#        print('Episode:', i)
         states, rewards, returns = get_episode(env, policy, start_state)
         
         # transform from hidden state space to observation space
@@ -45,24 +45,37 @@ def mc_eval(env, policy, tc, lr, start_state, num_episodes):
         # Update weights
         for t in range(len(returns)):
             w_idxs = tc(states[t])   # the only weights that are used for update
-
             w[w_idxs] += lr / num_tilings * (returns[t] - np.sum(w[w_idxs]))
 #        print(w[tc(start_obs)])
         values.append(np.sum(w[tc(start_obs)]))
     return values
 
 
-def td_eval(env, policy, tc, lr, lambd):
-    pass
-
-
-
-#class RandomAgent(object):
-#    """The world's simplest agent!"""
-#    def __init__(self, action_space):
-#        self.action_space = action_space
-#
-#    def act(self, observation, reward, done):
-#        return self.action_space.sample()
-    
+def td_lambda_eval(env, policy, tc, lr, lambd, start_state, num_episodes, gamma=1):
+    num_tilings = tc.tilings[0].ntilings
+    d = tc.size
+    w = np.random.uniform(-0.0001, 0.0001, size=d)
+#    values = [np.sum(w[tc(start_state)])]
+    values = []
+    for i in range(num_episodes):
+        states, rewards, returns = get_episode(env, policy, start_state)
+#        print(rewards)
+#        print(np.sum(rewards))
+#        sys.exit()
+        
+        # transform from hidden state space to observation space
+        start_obs = states[0]
+        
+        # Update weights
+        z = np.zeros(d)
+        for t in range(len(rewards)):
+            w_idxs = tc(states[t])
+            grad = np.zeros(d)
+            grad[w_idxs] = 1
+            z = gamma * lambd * z + grad
+            delta = rewards[t] + gamma * np.sum(w[tc(states[t + 1])]) - np.sum(w[w_idxs])
+            w += lr / num_tilings * delta * z
+#        print(w[tc(start_obs)])
+        values.append(np.sum(w[tc(start_obs)]))
+    return values
     
