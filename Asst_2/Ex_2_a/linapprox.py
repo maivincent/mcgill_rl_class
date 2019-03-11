@@ -13,16 +13,22 @@ def reset_state(env, start_state):
     return env.unwrapped._get_obs()
 
 
-def get_episode(env, policy, start_state):
+def get_episode(env, policy, start_state, discount_rewards=False, gamma=1):
     state = reset_state(env, start_state)
     states = [state]
     rewards = []
+    if discount_rewards:
+        discount = 1
     for _ in range(MAX_TIME_STEPS):
 #        env.render()
 #        print(observation)
         action = policy(env, state)
         state, reward, done, info = env.step(action)
         states.append(state)
+        
+        if discount_rewards:
+            reward *= discount
+            discount *= gamma
         rewards.append(reward)
         if done:
             break
@@ -30,14 +36,15 @@ def get_episode(env, policy, start_state):
     return states, rewards, returns    
 
 
-def mc_eval(env, policy, tc, lr, start_state, num_episodes):
+def mc_eval(env, policy, tc, lr, start_state, num_episodes, gamma=1):
     num_tilings = tc.tilings[0].ntilings
     d = tc.size
     w = np.random.uniform(-0.0001, 0.0001, size=d)
 #    values = [np.sum(w[tc(start_state)])]
     values = []
     for i in range(num_episodes):
-        states, rewards, returns = get_episode(env, policy, start_state)
+        states, rewards, returns = get_episode(env, policy, start_state,
+                                        discount_rewards=True, gamma=gamma)
         
         # transform from hidden state space to observation space
         start_obs = states[0]

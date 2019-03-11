@@ -12,9 +12,12 @@ NUM_EPISODES = 200
 LRS = [1/4, 1/8, 1/16]
 NUM_SEEDS = 10
 LAMBDAS = [0, 0.3, 0.7, 0.9, 1]
-#LRS = [1/8]
+GAMMAS = [.5, .9, .99, 1]
+
+#LRS = [1/4, 1/16]
 #NUM_SEEDS = 2
-#LAMBDAS = [.3]
+#LAMBDAS = [0.3, 0.9]
+#GAMMAS = [.5, .9]
 
 
 def policy(env, state):
@@ -74,7 +77,25 @@ if __name__ == '__main__':
 #    start_state = np.array([0, 0])  # pendulum at top
 #    start_state = np.array([np.pi/2, 0])    # pendulum to left
 #    start_state = np.array([-np.pi/2, 0])   # pendulum to right
+    
+    # Run TD(lambda) experiments
     for lambd in LAMBDAS:
+        for gamma in GAMMAS:
+            value_lists = []
+            for lr in LRS:
+                value_seeds = np.zeros((NUM_SEEDS, NUM_EPISODES))
+                for seed in range(NUM_SEEDS):
+                    print('lr:', lr)
+                    np.random.seed(seed)
+                    tc = get_tile_coding(env)
+                    value_seeds[seed, :] = td_lambda_eval(env, policy, tc, lr,
+                               lambd, start_state, NUM_EPISODES, gamma=gamma)
+                value_lists.append(value_seeds)
+            plot_vals(value_lists, ['lr={}'.format(lr) for lr in LRS],
+                                    'TD({}) with gamma={}'.format(lambd, gamma))
+    
+    # Run Monte Carlo experiments        
+    for gamma in GAMMAS:
         value_lists = []
         for lr in LRS:
             value_seeds = np.zeros((NUM_SEEDS, NUM_EPISODES))
@@ -82,11 +103,10 @@ if __name__ == '__main__':
                 print('lr:', lr)
                 np.random.seed(seed)
                 tc = get_tile_coding(env)
-#                value_seeds[seed, :] = mc_eval(env, policy, tc, lr, start_state,
-#                                               NUM_EPISODES)
-                value_seeds[seed, :] = td_lambda_eval(env, policy, tc, lr,
-                           lambd, start_state, NUM_EPISODES, gamma=1)
+                value_seeds[seed, :] = mc_eval(env, policy, tc, lr, start_state,
+                                               NUM_EPISODES, gamma=gamma)
             value_lists.append(value_seeds)
-        plot_vals(value_lists, ['lr={}'.format(lr) for lr in LRS], 'TD({})'.format(lambd))
+        plot_vals(value_lists, ['lr={}'.format(lr) for lr in LRS],
+                                'Monte Carlo with gamma={}'.format(gamma))
         
     
